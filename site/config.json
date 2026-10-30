@@ -10,5 +10,6 @@
  "icon": "tag",
  "theme": {"ink": "#14363a", "paper": "#fffaf3", "accent": "#ff6b6b",
            "fonts": "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600;700&display=swap"},
- "include_no_photo": false
+ "include_no_photo": false,
+ "GA_MEASUREMENT_ID": "G-Y7R5K9NMW0"
 }
