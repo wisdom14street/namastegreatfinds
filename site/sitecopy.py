@@ -105,12 +105,19 @@ def _whys(S):
             ('Mix and match in one cart', 'Add from any aisle and check out once on Shopify.'),
             ('Real photos and live stock', 'Every find has a photo and is in stock today.'),
             ('Ships from NYC', 'Packed and shipped from New York City.')]
+def _budget(S):
+    T = [('Under $10', 'Stocking stuffers, pocket stones, little extras.', '/gifts-under-10/', 0, 10, 'jewelry'), ('$10 to $25', 'The sweet spot for a thoughtful gift.', '/gifts-under-25/', 10, 25, 'decor'),
+         ('$25 to $50', 'Decks, bowls, bigger crystals and statues.', '/gifts-under-50/', 25, 50, 'sound')]
+    out = ''
+    for t, b, h, lo, hi, a in T:
+        pool = [x for x in S.by_rank(S.leaders) if lo <= x['price'] < hi and x['aisle'] == a and not x['noimg']]
+        n = sum(1 for x in S.products if x['price'] < hi)
+        if not pool: continue
+        u = pool[0]['images'][0]; u = u + ('&' if '?' in u else '?') + 'width=500'
+        out += f'<a class="coll" href="{h}"><img loading="lazy" src="{E(u)}" alt="" width="500" height="500"><div><h3>{E(t)}</h3><p>{E(b)}</p><span>{n:,} gifts &rarr;</span></div></a>'
+    return f'<section class="wrap"><div class="sechead"><h2>Shop by budget</h2></div><div class="colls">{out}</div></section>'
 HOME_SECTIONS = [
- {'type': 'collections', 'title': 'Shop by budget', 'items': [
-   {'title': 'Under $10', 'blurb': 'Stocking stuffers, pocket stones, little extras.', 'href': '/gifts-under-10/', 'filter': {'maxp': 10}},
-   {'title': 'Under $25', 'blurb': 'The sweet spot for a thoughtful gift.', 'href': '/gifts-under-25/', 'filter': {'maxp': 25}},
-   {'title': 'Under $50', 'blurb': 'Decks, bowls, bigger crystals and statues.', 'href': '/gifts-under-50/', 'filter': {'maxp': 50}},
-   {'title': 'Markdowns', 'blurb': 'Items currently below their usual price.', 'href': '/markdowns/', 'filter': None}]},
+ {'type': 'html', 'html': lambda S: _budget(S)},
  {'type': 'grid', 'title': 'Finds under $10', 'select': _u10, 'href': '/gifts-under-10/', 'link': 'All under $10'},
  {'type': 'collections', 'title': 'Shop by who it is for', 'items': [{'title': n, 'blurb': '', 'href': f'/gifts-for/{k}/', 'filter': {'fam': [k]}} for k, n, _ in FAMILIES[:6]]},
  {'type': 'grid', 'title': 'Finds from $10 to $25', 'select': _u25, 'href': '/gifts-under-25/', 'link': 'All under $25'},
