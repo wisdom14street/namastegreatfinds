@@ -1,0 +1,14 @@
+{
+ "brand": "Namaste Great Finds",
+ "short_name": "Great Finds",
+ "site_url": "https://namastegreatfinds.com",
+ "storefront": "Namaste Great Finds",
+ "REVIEW_URL": "",
+ "GOOGLE_SITE_VERIFICATION": "",
+ "bestseller_collections": [],
+ "siblings": [],
+ "icon": "tag",
+ "theme": {"ink": "#14363a", "paper": "#fffaf3", "accent": "#ff6b6b",
+           "fonts": "https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;600;700&display=swap"},
+ "include_no_photo": false
+}

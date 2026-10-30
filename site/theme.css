@@ -1,0 +1,3 @@
+:root{--ink:#14363a;--onink:#ffffff;--paper:#fffaf3;--card:#ffffff;--soft:#ffe9dc;--muted:#55686a;--line:#f0e2d4;--accent:#ff6b6b;--onaccent:#ffffff;--accentdark:#d64545;--focus:#ffd166;
+--display:"DM Serif Display",Georgia,serif;--body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--r:16px;--btnr:999px}
+.hero{background:radial-gradient(800px 380px at 90% 10%,#ffd16666,transparent 60%),radial-gradient(700px 360px at 0% 100%,#ff6b6b55,transparent 60%),#14363a}
