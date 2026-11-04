@@ -1,8 +1,7 @@
-/* Google Analytics 4 events for the storefronts. Every call is guarded: if gtag is blocked or missing, nothing breaks.
-   view_item on product pages, generate_lead on call / email / booking / directions / claim-listing links.
-   add_to_cart and begin_checkout are sent from cart.js. */
+/* Storefront engagement only. Link clicks are not leads, bookings, purchases or paid revenue.
+   add_to_cart and checkout_click are sent from cart.js. Confirmed purchases belong to Shopify. */
 (function(){
-  function ga(n,p){try{if(typeof window.gtag==='function')window.gtag('event',n,p||{})}catch(_){}}
+  function ga(n,p){try{var c=window.NI_CART||{};if(typeof window.gtag==='function')window.gtag('event',n,Object.assign({site_brand:c.brand,site_domain:c.domain},p||{}))}catch(_){}}
   window.niGA=ga;
   try{
     if(/^\/products\//.test(location.pathname)){
@@ -12,20 +11,25 @@
       if(it)ga('view_item',{currency:'USD',value:it.price,items:[it]});
     }
   }catch(_){}
-  var BOOK=/(book\.squareup\.com|squareup\.com\/appointments|square\.site|setmore\.com|calendly\.com|acuityscheduling\.com|as\.me\/|vagaro\.com|booksy\.com|schedulicity\.com|simplybook|fresha\.com|\/book-a-reading|\/booking)/i,
-      MAPS=/(google\.[a-z.]+\/maps|maps\.google\.|goo\.gl\/maps|maps\.app\.goo\.gl|maps\.apple\.com)/i;
+  var BOOK_HOSTS=['book.squareup.com','calendly.com','acuityscheduling.com','as.me','setmore.com'],
+      MAP_HOSTS=['www.google.com','maps.google.com','maps.apple.com','maps.app.goo.gl','goo.gl'];
   function kind(a){
     var h=a.getAttribute('href')||'';
     if(/^tel:/i.test(h))return'phone';
     if(/^mailto:/i.test(h))return/^mailto:claim@/i.test(h)?'claim':'email';
     var u;try{u=new URL(h,location.href)}catch(_){return''}
     if(u.origin===location.origin&&/^\/claim(\/|$)/.test(u.pathname))return'claim';
-    if(MAPS.test(u.href))return'directions';
-    if(BOOK.test(u.href)||(u.origin!==location.origin&&/^\s*book\b/i.test(a.textContent||'')))return'booking';
+    if(!/^https?:$/.test(u.protocol))return'';
+    if(MAP_HOSTS.indexOf(u.hostname)!==-1&&(u.pathname.indexOf('/maps')===0||u.hostname==='maps.apple.com'||u.hostname==='maps.app.goo.gl'))return'directions';
+    if(BOOK_HOSTS.indexOf(u.hostname)!==-1||(u.hostname==='namastebookshop.com'&&u.pathname.replace(/\/$/,'')==='/pages/book-a-reading'))return'booking';
+    if(u.hostname==='namastebookshop.com'&&!/^\/cart(?:\/|$)/.test(u.pathname))return'bookshop';
     return'';
   }
   document.addEventListener('click',function(e){try{
     var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;var k=kind(a);if(!k)return;
-    ga('generate_lead',{link_type:k,link_url:(a.getAttribute('href')||'').slice(0,200),link_text:(a.textContent||'').trim().replace(/\s+/g,' ').slice(0,100),transport_type:'beacon'});
+    var u=new URL(a.getAttribute('href'),location.href),names={phone:'contact_click',email:'contact_click',claim:'contact_click',booking:'booking_click',directions:'directions_click',bookshop:'bookshop_click'};
+    // Queries can contain email bodies or personal information; never send them in custom events.
+    var destination=/^https?:$/.test(u.protocol)?u.origin+u.pathname:u.protocol;
+    ga(names[k],{link_type:k,link_url:destination.slice(0,200),transport_type:'beacon'});
   }catch(_){}},true);
 })();

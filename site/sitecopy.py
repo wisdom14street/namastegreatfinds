@@ -1,4 +1,4 @@
-"""Namaste Great Finds (namastegreatfinds.com): a gift and finds shop across the whole Namaste Bookshop catalog, everything $60 and under,
+"""Namaste Great Finds (namastegreatfinds.com): a gift and finds shop across the whole Namaste Bookshop catalog, with options priced at $60 and under,
 organized by price and by the kind of person you are buying for. Copy written for this site only."""
 import re, types
 E = __import__('html').escape
@@ -68,7 +68,7 @@ BAR_TEXT = 'Gifts & finds'
 SEARCH_PLACEHOLDER = 'Search gifts: evil eye, buddha, journal'
 QUIZ = {
  'slug': 'gift-finder', 'nav': 'Gift finder', 'cta': 'Find a gift',
- 'title': 'Gift Finder: 3 Questions to the Right Gift', 'desc': 'Tell us who it is for, what kind of thing and your budget, and see gifts in stock today.',
+ 'title': 'Gift Finder: 3 Questions to the Right Gift', 'desc': 'Tell us who it is for, what kind of thing and your budget, and see gifts from the latest catalog refresh.',
  'h1': 'Find the right gift', 'lead': 'Three taps: who is it for, what kind of thing, and how much you want to spend. Your answers stay on this page.', 'submit': 'Show gifts',
  'questions': [
   {'q': 'Who is it for?', 'options': [{'label': k[1], 'filter': {'fam': [k[0]]}} for k in FAMILIES] + [{'label': 'Not sure yet', 'filter': {}}]},
@@ -79,7 +79,7 @@ QUIZ = {
 def FOOTER_EXPLORE(S):
     return [('Gifts under $10', '/gifts-under-10/'), ('Gifts under $25', '/gifts-under-25/'), ('Gifts under $50', '/gifts-under-50/'), ('Markdowns', '/markdowns/'),
             ('Gift finder', '/gift-finder/'), ('Gift guide', '/guide/spiritual-gift-ideas/'), ('Book a reading', READINGS)]
-FOOT_BLURB = 'Small, surprising gifts from a Manhattan spiritual shop, every one $60 or less, sorted so you can find one fast.'
+FOOT_BLURB = 'Small, surprising gifts from a Manhattan spiritual shop, with options from $60 or less, sorted so you can find one fast.'
 HERO_BASES = ('jewelry', 'crystal', 'decor', 'selfcare')
 def HERO(S):
     return {'eyebrow': 'Gifts $60 and under &middot; Sorted by price and person',
@@ -96,18 +96,18 @@ def _band(S, lo, hi, aisles=None):
     return out
 def _u10(S): return _band(S, 0, 10)
 def _u25(S): return _band(S, 10, 25)
-def _u50(S): return _band(S, 25, 50.01)
+def _u50(S): return _band(S, 25, 50)
 def _deals(S): return [x for x in S.products if x['compare'] and not x['noimg']][:8]
 def _whys(S):
-    return [('Everything $60 or less', 'No hunting through big-ticket items. Every find here is gift-priced.'),
+    return [('Gift options $60 and under', 'Each listing starts at $60 or less at the catalog refresh. Other options may cost more.'),
             ('Sorted by person', 'The crystal lover, the tarot reader, the meditator: start with who it is for.'),
-            (('Same-day pickup in Manhattan', f'Order online, collect inside Namaste Bookshop at 2 W 14th St. {S.READY}.') if S.PICKUP_ON else ('', '')),
+            (('Pickup in Manhattan', 'Choose Pickup at checkout if offered, then wait for your ready email before traveling to Namaste Bookshop.') if S.PICKUP_ON else ('', '')),
             ('Mix and match in one cart', 'Add from any aisle and check out once on Shopify.'),
-            ('Real photos and live stock', 'Every find has a photo and is in stock today.'),
+            ('Real photos, refreshed catalog', 'Prices and stock are refreshed daily. Availability is confirmed at checkout.'),
             ('Ships from NYC', 'Packed and shipped from New York City.')]
 def _budget(S):
-    T = [('Under $10', 'Stocking stuffers, pocket stones, little extras.', '/gifts-under-10/', 0, 10, 'jewelry'), ('$10 to $25', 'The sweet spot for a thoughtful gift.', '/gifts-under-25/', 10, 25, 'decor'),
-         ('$25 to $50', 'Decks, bowls, bigger crystals and statues.', '/gifts-under-50/', 25, 50, 'sound')]
+    T = [('Under $10', 'Stocking stuffers, pocket stones, little extras.', '/gifts-under-10/', 0, 10, 'jewelry'), ('Under $25', 'The sweet spot for a thoughtful gift.', '/gifts-under-25/', 10, 25, 'decor'),
+         ('Under $50', 'Decks, bowls, bigger crystals and statues.', '/gifts-under-50/', 25, 50, 'sound')]
     out = ''
     for t, b, h, lo, hi, a in T:
         pool = [x for x in S.by_rank(S.leaders) if lo <= x['price'] < hi and x['aisle'] == a and not x['noimg']]
@@ -133,9 +133,9 @@ def HOME_DESC(S): return f'About {S.ABOUT_N:,} gifts $60 and under: crystals, je
 def SHOP_TITLE(S): return 'All Gifts & Finds | Namaste Great Finds'
 def SHOP_DESC(S): return f'{S.N:,} gifts from {S.money(S.MIN_PRICE)} to $60. Filter by who it is for, kind and price.'
 SHOP_H1 = 'All finds'
-def SHOP_SUB(S): return f'{S.N:,} gifts in stock, all $60 or less.'
+def SHOP_SUB(S): return f'{S.N:,} gift listings with options from $60 or less at the last refresh. Final price and stock are confirmed at checkout.'
 def AISLE_TITLE(S, k): return f'{AISLES[k][0]} Gifts Under $60 | Namaste Great Finds'
-def AISLE_DESC(S, k): return f'{AISLES[k][3]} {S.cat_count[k]} gifts, all $60 or less. Ships from NYC or pick up at 2 W 14th St.'
+def AISLE_DESC(S, k): return f'{AISLES[k][3]} {S.cat_count[k]} gift listings with options from $60 or less. Ships from NYC or pick up at 2 W 14th St.'
 _FINTRO = {
  'crystal-lover': 'For someone who already has a windowsill of stones: hearts, spheres, carved animals and crystal jewelry.',
  'tarot-reader': 'For the friend who pulls a card every morning: decks, mini decks, pendulums, talismans and cloths.',
@@ -145,10 +145,10 @@ _FINTRO = {
  'luck-love': 'For a new job, a new home or a new love: evil eyes, elephants, hearts and luck charms.',
  'witchy': 'For the practitioner: candles, chalices, altar pieces, sage and spell kits.'}
 def LANDINGS(S):
-    L = [{'path': f'/gifts-for/{k}/', 'title': f'Gifts for {n.replace("The ", "the ")} Under $60 | Namaste Great Finds', 'desc': f'{S.fam_count[k]} gift ideas for {n.lower().replace("the ", "")}, all $60 or less. {_FINTRO[k]}',
-          'h1': f'Gifts for {n.lower().replace("the ", "the ")}' if n.startswith('The') else f'{n} gifts', 'sub': _FINTRO[k], 'filter': {'fam': [k]}} for k, n, _ in FAMILIES if S.fam_count[k] >= 4]
+    L = [{'path': f'/gifts-for/{k}/', 'title': f'Gifts for {n.replace("The ", "the ")} Under $60 | Namaste Great Finds', 'desc': f'{S.fam_count[k]} gift ideas for {n.lower().replace("the ", "")}, with options from $60 or less. {_FINTRO[k]}',
+          'h1': f'Gifts for {n.lower().replace("the ", "the ")}' if n.startswith('The') else f'{n} gifts', 'sub': _FINTRO[k], 'filter': {'fam': [k]}} for k, n, _ in FAMILIES]
     for p in (10, 25, 50):
-        L.append({'path': f'/gifts-under-{p}/', 'title': f'Spiritual Gifts Under ${p} | Namaste Great Finds', 'desc': f'Gifts under ${p}: crystals, jewelry, decks, candles and more, in stock today.',
+        L.append({'path': f'/gifts-under-{p}/', 'title': f'Spiritual Gifts Under ${p} | Namaste Great Finds', 'desc': f'Gifts under ${p}: crystals, jewelry, decks, candles and more from the latest catalog refresh.',
                   'h1': f'Gifts under ${p}', 'sub': {10: 'Small gifts, stocking stuffers and add-ons.', 25: 'Thoughtful gifts that do not break the bank.', 50: 'Bigger gifts: decks, bowls, statues and display crystals.'}[p], 'filter': {'maxp': p}})
     return L
 def GUIDES(S):
@@ -184,24 +184,24 @@ def describe(S, x):
     a = AISLES[x['aisle']][0].lower()
     fam = S.FAM_NAME.get(x['family'], '')
     s = [f"{E(x['title'])}, from our {E(a)} aisle at Namaste Great Finds."]
-    s.append(f'At {S.money(x["price"])} it sits in our ' + ('under-$10' if x['price'] < 10 else 'under-$25' if x['price'] < 25 else 'under-$50' if x['price'] < 50 else 'under-$60') + ' gift range.')
+    s.append(f'From {S.money(x["price"])} it sits in our ' + ('under-$10' if x['price'] < 10 else 'under-$25' if x['price'] < 25 else 'under-$50' if x['price'] < 50 else '$60-and-under') + ' gift range.')
     if fam: s.append(f'A good pick for {E(fam.lower().replace("the ", "")) if fam.startswith("The") else E(fam.lower()) + " lovers"}. <a href="/gifts-for/{x["family"]}/">More gifts like this</a>.')
-    s.append('Wrap it yourself, or pick it up the same day inside Namaste Bookshop, 2 West 14th Street. Ships from New York City; checkout is on Shopify.')
+    s.append('Ships from New York City. Choose pickup at Namaste Bookshop, 2 West 14th Street, if offered at checkout. Wait for your ready email before traveling.')
     return s
 def PRODUCT_DESC(S, x, v0): return f"{x['title']}, {S.money(v0['price'])}. A gift-priced find. Ships from NYC or pick up at 2 W 14th St."
 def ABOUT_DESC(S): return 'About Namaste Great Finds: gift-priced finds from Namaste Bookshop, run by Wealth Edge Ventures Inc.'
 ABOUT_H1 = 'About Namaste Great Finds'
 def ABOUT(S):
     return f'''<p class="lead">Namaste Great Finds is the gift table of a Manhattan spiritual shop, online.</p>
-<p>We pulled every photographed item priced $60 or less from the Namaste Bookshop shelves, about {S.ABOUT_N:,} of them, and sorted them by price and by the kind of person you are shopping for. Crystals, jewelry, tarot decks, candles, singing bowls, soaps and small things you did not know you needed.</p>
+<p>We selected photographed listings with an available option priced $60 or less from the Namaste Bookshop catalog, about {S.ABOUT_N:,} of them, and sorted them by price and by the kind of person you are shopping for. Crystals, jewelry, tarot decks, candles, singing bowls, soaps and small things you did not know you needed.</p>
 <h2>Who runs it</h2><p>{S.LEGAL} Wealth Edge Ventures also owns Namaste Bookshop, which holds the stock. Checkout runs on Shopify at <a href="{S.SHOP}" rel="noopener">namastebookshop.com</a>.</p>
-<h2>Pick up today</h2><p>Every find can be collected inside Namaste Bookshop at {S.STORE_ADDR}. Call <a href="tel:{S.TEL}">{S.PHONE}</a>.</p>{S.hours_html()}{S.visit_buttons()}'''
+<h2>Pickup at Namaste Bookshop</h2><p>Pickup availability and timing depend on your items. Confirm the option at checkout and wait for your ready email before traveling to {S.STORE_ADDR}. Call <a href="tel:{S.TEL}">{S.PHONE}</a>.</p>{S.hours_html()}{S.visit_buttons()}'''
 def FAQ_DESC(S): return 'Questions about Namaste Great Finds: prices, markdowns, gift pickup, shipping and returns.'
 FAQ_H1 = 'Gift shop FAQ'
 def FAQ(S):
-    return [('Why is everything $60 or less?', 'That is the idea: a gift shop where every item is gift-priced, so you never scroll past expensive pieces.'),
+    return [('How are gifts selected for the $60 budget?', 'Each listing has an in-stock option priced at $60 or less at the daily catalog refresh. Other options may cost more; check the selected option and final price at checkout.'),
             ('Are the markdowns real?', 'Markdowns show items whose live store price is below their usual compare-at price. If none are on sale, the page says so.'),
-            ('Can I pick up a gift today?', f'Yes, choose Pickup at checkout and collect inside Namaste Bookshop, {S.STORE_ADDR}.' + (f' {S.READY}.' if S.READY else '')),
+            ('Can I pick up a gift today?', f'Check whether Pickup is offered for your items at checkout. Confirm the estimate and wait for your ready email before traveling to Namaste Bookshop, {S.STORE_ADDR}.'),
             ('Do you gift wrap?', 'Ask at the counter when you pick up; we will help if we can.'),
             ('How does checkout work?', 'Your cart checks out on Shopify through namastebookshop.com, where shipping and pickup options are shown before you pay.')]
 NOT_FOUND = 'That find got snapped up'

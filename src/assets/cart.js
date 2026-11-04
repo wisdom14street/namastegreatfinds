@@ -5,7 +5,7 @@
   const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>[...(r||document).querySelectorAll(s)];
   const money=v=>'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const ga=(n,p)=>{try{if(typeof window.gtag==='function')window.gtag('event',n,p)}catch(_){}};   // GA4, never blocks the cart
+  const ga=(n,p)=>{try{if(typeof window.gtag==='function')window.gtag('event',n,{site_brand:C.brand,site_domain:C.domain,...p})}catch(_){}};   // GA4, never blocks the cart
   const gaItem=x=>({item_id:String(x.v),item_name:String(x.t||'')+(x.vt&&x.vt!=='Default Title'?' - '+x.vt:''),price:+x.p||0,quantity:+x.q||1,...(x.c?{item_category:x.c}:{})});
   const KEY='ni_cart_v1:'+C.domain,HARD_MAX=99,FRESH=10*60*1000;
   let items=load();
@@ -18,14 +18,22 @@
   const subtotal=()=>live().reduce((s,x)=>s+x.p*x.q,0);
   function checkoutUrl(){
     const parts=live().map(x=>x.v+':'+Math.min(x.q,cap(x)));if(!parts.length)return'';
-    return C.shop+'/cart/'+parts.join(',')+C.attr+'&attributes%5BSite%5D='+encodeURIComponent(C.domain)+'&note='+encodeURIComponent('Ordered on '+C.brand+' ('+C.domain+')')+'&ref='+encodeURIComponent(C.ref);
+    const url=new URL(C.shop+'/cart/'+parts.join(',')+C.attr);
+    url.searchParams.set('attributes[Site]',C.domain);
+    url.searchParams.set('note','Ordered on '+C.brand+' ('+C.domain+')');
+    url.searchParams.set('ref',C.ref);
+    url.searchParams.set('utm_source',C.domain);
+    url.searchParams.set('utm_medium','referral');
+    url.searchParams.set('utm_campaign','namaste_storefront');
+    url.searchParams.set('utm_content','checkout');
+    return url.href;
   }
   window.NI_CART_URL=checkoutUrl;
   function add(d,q){
-    q=q||1;let x=items.find(y=>String(y.v)===String(d.v));
+    q=q||1;let x=items.find(y=>String(y.v)===String(d.v));const before=x?x.q:0;
     if(x){x.q=Math.min(cap(x),x.q+q);x.out=false}
     else{x={v:String(d.v),h:d.h,t:d.t,vt:d.vt||'',p:+d.p,i:d.i||'',q:1,max:+d.max||0,c:d.c||'',ts:0};x.q=Math.min(cap(x),q);items.push(x)}
-    save();check([x],true);return x;
+    save();check([x],true);return {...x,q:x.q-before};
   }
   // live price / stock from the Shopify store (same public endpoint the product pages use)
   const pend={};
@@ -58,7 +66,7 @@
 ${x.max>0&&x.q>=x.max?`<span class="cimax">Limit ${x.max} per order</span>`:''}</div><b class="cil">${money(x.p*x.q)}</b></li>`;
   }
   function html(){
-    const n=count(),url=checkoutUrl(),pick=C.pickup?`<div class="cpick"><b>Free pickup inside Namaste Bookshop, ${esc(C.street)}</b><span>Choose <b>Pickup</b> at checkout and collect it inside Namaste Bookshop, 2 W 14th St, near Union Square. No shipping fee.${C.ready?' '+esc(C.ready)+'.':''}</span></div>`:`<div class="cpick"><b>Collect it at ${esc(C.street)}</b><span>Choose pickup at checkout if it is offered for your items, or ship from New York City.</span></div>`;
+    const n=count(),url=checkoutUrl(),pick=`<div class="cpick"><b>Pickup at Namaste Bookshop, ${esc(C.street)}</b><span>Choose <b>Pickup</b> at checkout if it is offered for your items. Check the ready-time estimate and wait for your ready email before traveling.</span></div>`;
     if(!items.length)return `<div class="cempty"><p>Your cart is empty.</p><a class="btn" href="/shop/">Start shopping</a></div>${pick}<div class="cups" data-ups></div>`;
     return `<ul class="clist">${items.map(rowHtml).join('')}</ul>
 <div class="csum"><div class="crow"><span>Subtotal (${live().reduce((a,x)=>a+x.q,0)} item${n===1?'':'s'})</span><b>${money(subtotal())}</b></div><p class="small">Shipping and tax are shown at checkout.</p></div>
@@ -97,13 +105,14 @@ ${pick}${url?`<a class="btn ccheck" href="${esc(url)}" rel="nofollow" data-check
       if(e.shiftKey&&document.activeElement===f[0]){f[f.length-1].focus();e.preventDefault()}else if(!e.shiftKey&&document.activeElement===f[f.length-1]){f[0].focus();e.preventDefault()}}});
   document.addEventListener('click',e=>{
     const t=e.target.closest('[data-atc],[data-atc-items],[data-cart-open],[data-cart-close],[data-inc],[data-dec],[data-rm],[data-checkout]');if(!t)return;
-    if(t.hasAttribute('data-checkout')){const u=checkoutUrl();if(u)t.href=u;try{const l=live();if(l.length)ga('begin_checkout',{currency:'USD',value:Math.round(subtotal()*100)/100,items:l.map(gaItem),transport_type:'beacon'})}catch(_){}return}
+    if(t.hasAttribute('data-checkout')){const u=checkoutUrl();if(!u){e.preventDefault();return}t.href=u;try{const l=live();if(l.length)ga('checkout_click',{currency:'USD',value:Math.round(subtotal()*100)/100,items:l.map(gaItem),transport_type:'beacon'})}catch(_){}return}
     if(t.hasAttribute('data-cart-open')){e.preventDefault();open();return}
     if(t.hasAttribute('data-cart-close')){if(drawer&&!drawer.hidden){e.preventDefault();close()}return}
     if(t.hasAttribute('data-atc')||t.hasAttribute('data-atc-items')){e.preventDefault();if(t.disabled||t.getAttribute('aria-disabled')==='true')return;
       let list;try{list=t.hasAttribute('data-atc-items')?JSON.parse(t.getAttribute('data-atc-items')):[t.dataset]}catch(_){return}
-      list.forEach(d=>add(d,+(d.q||1)));
-      try{const gi=list.map(d=>gaItem({v:d.v,t:d.t,vt:d.vt,p:d.p,q:+(d.q||1),c:d.c}));ga('add_to_cart',{currency:'USD',value:Math.round(gi.reduce((s,x)=>s+x.price*x.quantity,0)*100)/100,items:gi})}catch(_){}
+      const added=list.map(d=>add(d,+(d.q||1))).filter(x=>x.q>0);
+      if(!added.length){open('This item is already at its order limit.');return}
+      try{const gi=added.map(gaItem);ga('add_to_cart',{currency:'USD',value:Math.round(gi.reduce((s,x)=>s+x.price*x.quantity,0)*100)/100,items:gi})}catch(_){}
       const lab=t.textContent;t.classList.add('added');t.textContent='Added ✓';setTimeout(()=>{t.textContent=lab;t.classList.remove('added')},1600);
       open(list.length>1?`Added ${list.length} items to your cart.`:`Added ${list[0].t} to your cart.`);return}
     const row=t.closest('[data-v]');const x=row&&items.find(y=>String(y.v)===row.dataset.v);if(!x)return;

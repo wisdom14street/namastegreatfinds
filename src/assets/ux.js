@@ -24,7 +24,7 @@
   const buy=$('#buy'),bar=$('.stickybuy');
   if(buy&&bar&&'IntersectionObserver' in window){
     const sb=$('button',bar),pr=$('[data-sb-price]',bar),src=$('#price');
-    const sync=()=>{sb.disabled=buy.disabled;sb.textContent=buy.disabled?'Sold out':'Add to cart';if(src&&pr)pr.textContent=src.textContent};
+    const sync=()=>{sb.disabled=buy.disabled;sb.textContent=buy.textContent;if(src&&pr)pr.textContent=src.textContent};
     sb.addEventListener('click',()=>{if(!buy.disabled)buy.click()});
     new MutationObserver(sync).observe(buy,{attributes:true,childList:true,characterData:true,subtree:true});sync();
     new IntersectionObserver(es=>{const off=!es[0].isIntersecting&&es[0].boundingClientRect.top<0;bar.classList.toggle('on',off);document.body.classList.toggle('sb-on',off)}).observe(buy)}
